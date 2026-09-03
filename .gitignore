@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+*.log
+.pytest_cache/
+.vscode/
+venv/
+dist/
+build/
+*.egg-info/
