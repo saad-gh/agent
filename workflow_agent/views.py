@@ -157,6 +157,48 @@ def approve_agent_plan_view(request, run_id):
         return JsonResponse({"error": str(e)}, status=500)
 
 
+@csrf_exempt
+@require_http_methods(["POST"])
+def approve_manual_step_view(request, step_id):
+    """
+    POST /agent/step/<step_id>/approve/
+    Human principal approves an escalated ManualStep / transaction requirement.
+    Marks ManualStep as done and resumes associated workflow checkpoint if present.
+    """
+    try:
+        step = ManualStep.objects.filter(id=step_id).first()
+        if not step:
+            return JsonResponse({"error": "ManualStep not found"}, status=404)
+
+        data = json.loads(request.body) if request.body else {}
+        decision_input = data.get("result_input", {"approved_by_human": True})
+
+        step.status = ManualStep.STATUS_DONE
+        step.result_input = decision_input
+        step.save(update_fields=['status', 'result_input'])
+
+        resumed_run_id = None
+        if step.workflow_id:
+            from workflow_orchestrator.models import Checkpoint
+            from workflow_orchestrator.traverser import resume_run
+            import asyncio
+
+            cp = Checkpoint.objects.filter(workflow_id=step.workflow_id).first()
+            if cp:
+                resumed_run_id = asyncio.run(resume_run(cp.id))
+
+        return JsonResponse({
+            "status": "approved",
+            "step_id": step.id,
+            "description": step.description,
+            "resumed_run_id": resumed_run_id,
+            "message": f"ManualStep #{step.id} approved by human principal."
+        }, status=200)
+    except Exception as e:
+        logger.error(f"Error in approve_manual_step_view: {e}", exc_info=True)
+        return JsonResponse({"error": str(e)}, status=500)
+
+
 def _materialize_plan_dsl(plan: dict, tenant) -> dict:
     """
     Materialize 5-array JSON plan into Task, Workflow, WorkflowContinuation, and TaskContinuation rows.

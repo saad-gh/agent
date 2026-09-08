@@ -7,6 +7,7 @@ name = "workflow-agent"
 version = "0.1.0"
 description = "Workflow Agent — agentic workflow builder and manager built on workflow-orchestrator."
 requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
 
 dependencies = [
     "Django>=4.2",

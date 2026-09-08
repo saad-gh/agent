@@ -138,6 +138,44 @@ TOOL_DEFINITIONS = [
         }
     },
     {
+        "name": "search_suppliers",
+        "description": "Search and compare qualified component or product suppliers for procurement.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "item_name": {"type": "string", "description": "Name or specifications of the item/product"},
+                "quantity": {"type": "integer", "description": "Required unit quantity"}
+            },
+            "required": ["item_name", "quantity"]
+        }
+    },
+    {
+        "name": "get_quote",
+        "description": "Request a formal price quotation and apply allowed negotiation discount from a supplier.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "supplier_id": {"type": "string", "description": "Supplier ID (e.g., 'sup-001')"},
+                "item_name": {"type": "string", "description": "Name of the item"},
+                "quantity": {"type": "integer", "description": "Quantity requested"},
+                "target_discount_pct": {"type": "number", "description": "Negotiation discount percentage requested (max 15%)"}
+            },
+            "required": ["supplier_id", "quantity"]
+        }
+    },
+    {
+        "name": "check_governance_policy",
+        "description": "Check whether a proposed transaction or action is within delegated spending authority limits.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "action": {"type": "string", "description": "Action name (e.g. 'purchase', 'negotiate')"},
+                "amount": {"type": "number", "description": "Total monetary amount in USD"}
+            },
+            "required": ["action", "amount"]
+        }
+    },
+    {
         "name": "finalize_plan",
         "description": "Finalize and submit the proposed 5-array declarative workflow plan JSON.",
         "parameters": {
@@ -419,6 +457,80 @@ def _handle_declare_manual_step(args: dict, context: Any) -> dict:
     }
 
 
+def _handle_search_suppliers(args: dict, context: Any) -> dict:
+    item_name = args.get('item_name', 'Industrial Sensors')
+    quantity = int(args.get('quantity', 100))
+
+    suppliers = [
+        {
+            "supplier_id": "sup-001",
+            "name": "Apex Industrial Components",
+            "unit_price_usd": 45.00,
+            "total_price_usd": 45.00 * quantity,
+            "lead_time_days": 3,
+            "rating": 4.8
+        },
+        {
+            "supplier_id": "sup-002",
+            "name": "Global Tech Logistics",
+            "unit_price_usd": 120.00,
+            "total_price_usd": 120.00 * quantity,
+            "lead_time_days": 2,
+            "rating": 4.9
+        },
+        {
+            "supplier_id": "sup-003",
+            "name": "Gulf Precision Electronics",
+            "unit_price_usd": 42.50,
+            "total_price_usd": 42.50 * quantity,
+            "lead_time_days": 5,
+            "rating": 4.6
+        }
+    ]
+    return {
+        "status": "success",
+        "item_name": item_name,
+        "quantity": quantity,
+        "suppliers": suppliers
+    }
+
+
+def _handle_get_quote(args: dict, context: Any) -> dict:
+    supplier_id = args.get('supplier_id', 'sup-001')
+    item_name = args.get('item_name', 'Industrial Sensors')
+    quantity = int(args.get('quantity', 100))
+    discount_pct = float(args.get('target_discount_pct', 0.0))
+
+    base_unit_price = 45.00 if supplier_id == 'sup-001' else (120.00 if supplier_id == 'sup-002' else 42.50)
+    discounted_unit_price = base_unit_price * (1.0 - (discount_pct / 100.0))
+    total_price = round(discounted_unit_price * quantity, 2)
+
+    return {
+        "status": "success",
+        "quote_id": f"QT-{supplier_id.upper()}-8821",
+        "supplier_id": supplier_id,
+        "item_name": item_name,
+        "quantity": quantity,
+        "unit_price_usd": round(discounted_unit_price, 2),
+        "discount_applied_pct": discount_pct,
+        "total_price_usd": total_price,
+        "valid_until": "2026-10-01"
+    }
+
+
+def _handle_check_governance_policy(args: dict, context: Any) -> dict:
+    org_id = getattr(context, 'org_id', 1)
+    action = args.get('action', 'purchase')
+    amount = float(args.get('amount', 0.0))
+
+    from .governance import evaluate_action_policy
+    decision = evaluate_action_policy(org_id, action, amount, args)
+    return {
+        "status": "success",
+        "decision": decision.to_dict()
+    }
+
+
 def _handle_finalize_plan(args: dict, context: Any) -> dict:
     plan = args.get('plan', {})
     from .dsl import validate_plan_dsl
@@ -455,6 +567,9 @@ _TOOL_HANDLERS = {
     "define_python_function": _handle_define_python_function,
     "ask_question": _handle_ask_question,
     "declare_manual_step": _handle_declare_manual_step,
+    "search_suppliers": _handle_search_suppliers,
+    "get_quote": _handle_get_quote,
+    "check_governance_policy": _handle_check_governance_policy,
     "finalize_plan": _handle_finalize_plan,
 }
 
