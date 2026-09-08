@@ -20,7 +20,7 @@ dependencies = [
     "psycopg2-binary>=2.9",
     "httpx>=0.25",
     "pgvector>=0.2.0",
-    "workflow-orchestrator",
+    "workflow-orchestrator @ git+https://github.com/saad-gh/workflow.git",
 ]
 
 [project.optional-dependencies]

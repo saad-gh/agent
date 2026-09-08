@@ -250,8 +250,8 @@ Every agent run and workflow execution produces an immutable audit trail:
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/workflow-agent.git
-cd workflow-agent
+git clone https://github.com/saad-gh/agent.git
+cd agent
 
 # Set up virtual environment
 python3 -m venv venv
