@@ -1,0 +1,46 @@
+{
+  "service": "shopify",
+  "version": "2024-01",
+  "endpoints": [
+    {
+      "slug": "shopify_list_orders",
+      "method": "GET",
+      "path": "/admin/api/2024-01/orders.json",
+      "summary": "Retrieve shopify orders",
+      "params": [
+        {
+          "name": "status",
+          "in": "query",
+          "source": "{{ payload.status }}"
+        }
+      ],
+      "response": {
+        "items_field": "orders",
+        "pagination": {
+          "type": "cursor",
+          "next_field": "next_page_info"
+        }
+      },
+      "auth": {
+        "scopes": [
+          "read_orders"
+        ]
+      }
+    },
+    {
+      "slug": "shopify_get_order_by_id",
+      "method": "GET",
+      "path": "/admin/api/2024-01/orders/{{ parent.response_json.order_id }}.json",
+      "summary": "Retrieve specific order details",
+      "params": [],
+      "response": {
+        "items_field": "order"
+      },
+      "auth": {
+        "scopes": [
+          "read_orders"
+        ]
+      }
+    }
+  ]
+}
