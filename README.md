@@ -3,7 +3,7 @@
 > **Bounded Agentic AI, Governance & Durable Execution Substrate**  
 > A reproducible demonstrator of an enterprise platform where rule-bound AI agents plan, negotiate, and execute workflows under explicit delegated authority.
 
-[![Tests](https://img.shields.io/badge/tests-131%20passing-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-149%20passing-brightgreen.svg)]()
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)]()
 [![Django](https://img.shields.io/badge/django-4.2+-success.svg)]()
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)]()
@@ -271,8 +271,14 @@ cp .env.example .env
 The repository includes a 100% reproducible, zero-infrastructure CLI demonstrator that requires no external database or API keys.
 
 ```bash
-# Run the CLI demonstrator
+# Run the end-to-end multi-agent demonstrator
 python demo.py
+
+# Or run individual specialized agent demonstrators:
+python manage.py endpoint_demo    # Agent A (Endpoint Specialist)
+python manage.py architect_demo   # Agent B (Workflow Architect)
+python manage.py governance_demo  # Governance Agent
+python manage.py procurement_demo  # Procurement Agent
 ```
 
 ### What the Demo Displays:
@@ -308,14 +314,14 @@ Key variables supported in `.env` (see `.env.example`):
 Both test suites run locally using SQLite and `fakeredis`:
 
 ```bash
-# Run all workflow_agent tests (34 tests)
+# Run all workflow_agent tests (52 tests across core, security, spec, and specialized agents)
 USE_SQLITE=True python manage.py test workflow_agent.tests
 
 # Run workflow_orchestrator test suite (97 tests)
 python manage.py test workflow_orchestrator.tests --settings=tests.settings
 ```
 
-**Total Test Coverage:** 131 tests passing cleanly.
+**Total Test Coverage:** 149 tests passing cleanly.
 
 ---
 
