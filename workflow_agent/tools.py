@@ -240,7 +240,7 @@ def _handle_get_service_resources(args: dict, context: Any) -> dict:
     if not srv:
         return {"status": "error", "error": f"Service '{service_name}' not found"}
 
-    resources = list(Resource.objects.filter(service=srv).values('id', 'name', 'url', 'metadata'))
+    resources = list(Resource.objects.filter(service=srv).values('id', 'name', 'metadata'))
     return {"status": "success", "service": srv.name, "resources": resources}
 
 
